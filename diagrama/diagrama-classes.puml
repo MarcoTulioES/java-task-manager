@@ -1,0 +1,135 @@
+@startuml diagrama-classes
+title Diagrama de Classes - Sistema Hospitalar - Sprint 2
+skinparam classAttributeIconSize 0
+hide empty members
+
+abstract class ProfissionalSaude {
+  - id: Long
+  - nome: String
+  - registroConselho: String
+  - telefone: String
+  - email: String
+}
+class MedicoClinicoGeral
+class MedicoEspecialista {
+  - especialidade: String
+}
+class Cirurgiao {
+  - areaCirurgica: String
+  - procedimentosRealizados: List<ProcedimentoCirurgico>
+  + registrarProcedimento()
+}
+ProfissionalSaude <|-- MedicoClinicoGeral
+ProfissionalSaude <|-- MedicoEspecialista
+ProfissionalSaude <|-- Cirurgiao
+
+class Paciente {
+  - id: Long
+  - nome: String
+  - cpf: String
+  - dataNascimento: LocalDate
+  - telefone: String
+  - email: String
+}
+abstract class Atendimento {
+  - id: Long
+  - dataHora: LocalDateTime
+  - status: StatusAtendimentoEnum
+  + validarCondicoes()
+  + alterarStatus(status)
+}
+class ConsultaRotina {
+  - motivo: String
+  - observacoes: String
+}
+class ConsultaEspecializada {
+  - especialidade: String
+  - observacoes: String
+}
+class AtendimentoEmergencia {
+  - prioridade: PrioridadeEnum
+  - statusEmergencia: StatusEmergenciaEnum
+}
+class ProcedimentoCirurgico {
+  - descricao: String
+  - tipoCirurgia: String
+  - dataHoraEfetiva: LocalDateTime
+  - statusProcedimento: StatusProcedimentoEnum
+  + concluir()
+}
+Atendimento <|-- ConsultaRotina
+Atendimento <|-- ConsultaEspecializada
+Atendimento <|-- AtendimentoEmergencia
+Atendimento <|-- ProcedimentoCirurgico
+Paciente "1" -- "0..*" Atendimento
+ProfissionalSaude "1" -- "0..*" Atendimento
+
+class HistoricoMedico {
+  - id: Long
+  - paciente: Paciente
+  - atendimentos: List<Atendimento>
+  - internacoes: List<Internacao>
+  + adicionarAtendimento()
+  + adicionarInternacao()
+}
+Paciente "1" *-- "1" HistoricoMedico
+HistoricoMedico o-- "0..*" Atendimento
+HistoricoMedico o-- "0..*" Internacao
+
+class Quarto {
+  - numero: String
+  - capacidade: int
+  - leitosOcupados: int
+  - situacao: SituacaoQuartoEnum
+  + temVagaDisponivel()
+  + ocuparLeito()
+  + liberarLeito()
+}
+class Internacao {
+  - dataEntrada: LocalDateTime
+  - dataAlta: LocalDateTime
+  - situacao: SituacaoInternacaoEnum
+}
+Paciente "1" -- "0..*" Internacao
+Quarto "1" -- "0..*" Internacao
+
+enum StatusAtendimentoEnum {
+  AGENDADA
+  CONFIRMADA
+  EM_ATENDIMENTO
+  CONCLUIDA
+  CANCELADA
+  NAO_COMPARECEU
+}
+enum PrioridadeEnum {
+  BAIXA
+  MODERADA
+  ALTA
+  CRITICA
+}
+enum StatusEmergenciaEnum {
+  AGUARDANDO
+  INICIADO
+  CONCLUIDO
+}
+enum StatusProcedimentoEnum {
+  AGENDADO
+  EM_ANDAMENTO
+  CONCLUIDO
+  CANCELADO
+}
+enum SituacaoQuartoEnum {
+  DISPONIVEL
+  OCUPADO
+  MANUTENCAO
+}
+enum SituacaoInternacaoEnum {
+  ATIVA
+  ALTA
+  CANCELADA
+}
+Atendimento ..> StatusAtendimentoEnum
+AtendimentoEmergencia ..> PrioridadeEnum
+ProcedimentoCirurgico ..> StatusProcedimentoEnum
+Quarto ..> SituacaoQuartoEnum
+@enduml
